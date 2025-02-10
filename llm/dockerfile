@@ -1,4 +1,5 @@
-FROM nvidia/cuda:12.0-base-ubuntu20.04  # Or your preferred CUDA base image
+# Or your preferred CUDA base image
+FROM nvidia/cuda:12.0-base-ubuntu20.04  
 
 WORKDIR /app
 
@@ -11,4 +12,5 @@ COPY . .
 # Expose the LLM port
 EXPOSE 8000
 
-CMD ["python", "llm_service.py"] # Start your LLM service
+# Start your LLM service
+CMD ["python", "llm_service.py"] 
