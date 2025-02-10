@@ -1,0 +1,47 @@
+version: "3.9" # Or your preferred version
+
+services:
+  api:
+    build: ./api
+    ports:
+      - "5000:5000" # Map host port 5000 to container port 5000
+    depends_on:
+      - vector_db
+    environment:
+      - VECTOR_DB_URL=vector_db:8080 # Example, adjust as needed
+      - LLM_URL=llm:8000 # Example, adjust as needed
+
+  vector_db:
+    build: ./vector_db
+    ports:
+      - "8080:8080" # Example port mapping
+    volumes:
+      # Persist data. If you don't need to persist, you can remove this
+      - vectordb_data:/data
+
+  llm:
+    build: ./llm
+    ports:
+      - "8000:8000" # Example port mapping
+    deploy:
+      resources:
+        reservations:
+          # Request GPU resources
+          devices:
+            - driver: nvidia
+              count: 1 # Request 1 GPU (adjust if needed)
+              capabilities: [ gpu ]
+    volumes:
+      - ./llm/models:/app/models # Mount LLM model files
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=0 # Use first GPU
+
+  webui:
+    build: ./webui
+    ports:
+      - "3000:3000" # Example port mapping
+    depends_on:
+      - api
+
+volumes:
+  vectordb_data: # Define the named volume
