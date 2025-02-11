@@ -1,0 +1,27 @@
+[[source]]
+url = "https://pypi.org/simple/"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+flask = "*" 
+requests = "*"
+blinker = "==1.9.0" 
+
+[dev-packages]
+pytest = "*"
+pytest-cov = "*"
+pre-commit = "*"
+isort = "*"
+black = "*"
+autopep8 = "*"
+requests-mock = {extras = ["fixture"], version = "*"}
+flake8 = "*"
+Flake8-pyproject = "*"
+flake8-annotations-complexity = "*"
+flake8-expression-complexity = "*"
+flake8-cognitive-complexity = "*"
+flake8-adjustable-complexity = "*"
+
+[requires]
+python_version = "3.12"
