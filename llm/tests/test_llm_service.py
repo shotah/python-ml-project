@@ -33,9 +33,9 @@ def test_generate_text_empty_prompt(client):
         '/llm/generate',
         json={'prompt': ''}  # Empty prompt
     )
-    assert response.status_code == 200 # Or you might expect 400, adjust assertion if needed
+    assert response.status_code == 400 # Or you might expect 400, adjust assertion if needed
     data = json.loads(response.data.decode('utf-8'))
-    assert 'response' in data
-    assert isinstance(data['response'], str)
+    assert "error" in data
+    assert isinstance(data['error'], str)
     # You might want to assert something about the response content for an empty prompt
     # For now, just checking for a valid response.

@@ -1,33 +1,36 @@
 from flask import Flask, request, jsonify
-from transformers import pipeline, BitsAndBytesConfig
+from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig, pipeline
 import os
 import torch
 
 app = Flask(__name__)
 
-# Set HF_HOME (or use a default)
-# HF_HOME = os.environ.get("HF_HOME", "/app/models/.cache")
-HF_HOME = os.path.join(os.path.dirname(__file__), 'models', '.cache') 
+# Set HF_HOME to a relative path
+HF_HOME = os.path.join(os.path.dirname(__file__), 'models', '.cache')
 os.environ["HF_HOME"] = HF_HOME
-# Model Path - Construct it dynamically for robustness
-model_path = os.path.join(HF_HOME, "models--bigcode--starcoder2-7b")  # or your model folder name
+
+# Base Model Path
+model_base_path = os.path.join(HF_HOME, "models--bigcode--starcoder2-7b")
+
+# Dynamically determine snapshot directory (assuming there's only one or we want the first one)
+snapshots_dir = os.path.join(model_base_path, "snapshots")
+snapshot_id = os.listdir(snapshots_dir)[0]  # Get the first directory name in snapshots
+model_path = os.path.join(snapshots_dir, snapshot_id) # Dynamic model path
 
 # Quantization Configuration
-quantization_config = BitsAndBytesConfig(load_in_4bit=True)  # Or 8-bit
+quantization_config = BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_compute_dtype=torch.float16)
 
 try:
+    tokenizer = AutoTokenizer.from_pretrained(model_path, local_files_only=True)
+    model = AutoModelForCausalLM.from_pretrained(model_path, local_files_only=True, torch_dtype=torch.float16, quantization_config=quantization_config)
     llm_pipeline = pipeline(
-        "text-generation",
-        model=model_path,
-        local_files_only=True,
-        torch_dtype=torch.float16,
+        'text-generation',
+        model=model,
+        tokenizer=tokenizer,
         device_map="auto",
-        quantization_config=quantization_config,
-        max_new_tokens=200,
-        temperature=0.7,
-        top_p=0.95,
+        do_sample=True
     )
-    print("LLM pipeline initialized successfully.") #Add a success message
+    print("LLM pipeline initialized successfully.")
 except Exception as e:
     print(f"Error initializing LLM pipeline: {e}")
     exit(1)
