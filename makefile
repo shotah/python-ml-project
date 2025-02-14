@@ -4,6 +4,7 @@
 
 # Define default values for your variables (optional, but good practice)
 HUGGING_FACE_TOKEN ?= ""  # Provide a default if the variable isn't in .env
+MEMORY_LIMIT ?= 16g # Default value
 
 ############################
 # UTILS
@@ -40,12 +41,11 @@ PHONY: llm-test
 llm-test:
 	cd ./llm && pipenv run pytest
 
-
 PHONY: llm-build
 llm-build:
-	cd ./llm && docker build --build-arg HUGGING_FACE_TOKEN="$(HUGGING_FACE_TOKEN)" -t llm_test .
-
-
+	cd ./llm && docker build  --no-cache \
+	--build-arg HUGGING_FACE_TOKEN="$(HUGGING_FACE_TOKEN)" \
+	-t llm_test:latest -f ./dockerfile .
 
 ############################
 # Docker
@@ -53,7 +53,6 @@ llm-build:
 PHONY: docker-clean
 docker-clean:
 	docker system prune -a
-
 
 ############################
 # Docker compose
@@ -73,3 +72,7 @@ down:
 PHONY: reup
 reup:
 	docker-compose up -d --build
+
+PHONY: list
+list:
+	docker-compose ps

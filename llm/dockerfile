@@ -1,59 +1,33 @@
-FROM nvidia/cuda:12.2.0-base-ubuntu22.04
+FROM tensorflow/tensorflow:latest-gpu
+
 ARG HUGGING_FACE_TOKEN
-ENV HUGGING_FACE_TOKEN=$HUGGING_FACE_TOKEN
 
 WORKDIR /app
 
-# Set DEBIAN_FRONTEND to noninteractive (CRUCIAL)
-ENV DEBIAN_FRONTEND=noninteractive
+# Install pipenv
+RUN pip install pipenv
 
-# Install software-properties-common (required for add-apt-repository)
-RUN apt-get update && apt-get install -y software-properties-common
-
-# Add the deadsnakes PPA
-RUN add-apt-repository ppa:deadsnakes/ppa
-
-# Install Python and pip (using apt)
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3 \
-    python3.12 \
-    python3-pip
-
-# Copy pipfile and pipfile.lock
+# Copy Pipfile and Pipfile.lock
 COPY Pipfile Pipfile.lock ./
-
-# Install system dependencies if required (adjust based on your needs)
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libnvidia-compute-495 \
-    libnvidia-compute-495-server \
-    libcuda.so.1 \
-    libcuda-11.5-1 \
-    libcudart11.0 \
-    libcufft10 \
-    libcurand10 \
-    && rm -rf /var/lib/apt/lists/* || echo "weird things are happening!!!"
-
-# Upgrade blinker at the system level (Less Recommended)
-RUN apt-get update && apt-get install -y --no-install-recommends python3-blinker && rm -rf /var/lib/apt/lists/*
 
 # Install project dependencies
-COPY Pipfile Pipfile.lock ./
-RUN pip install pipenv
-RUN pipenv install --system --deploy --no-site-packages
+RUN pipenv install --system
 
-# Set the Transformers cache directory
-RUN mkdir -p /app/.cache
-ENV HF_HOME=/app/.cache
+# Set HF_HOME (but don't rely on it for the download)
+ENV HF_HOME=/app/models/.cache
 
-# Install transformers (if not already in your Pipfile)
-RUN pip install torch tensorflow transformers
+# Authenticate with Hugging Face (using build argument)
+ENV HUGGING_FACE_HUB_TOKEN=$HUGGING_FACE_TOKEN
 
-# Download starcoder2 (replace with the specific model you want)
-RUN pipenv run transformers-cli login
-RUN pipenv run transformers-cli download --trust-remote-code bigcode/starcoder2-7b
+# Login to Hugging Face (CRUCIAL!)
+# TODO: fix later
+# RUN pipenv run transformers-cli login
+
+# Download starcoder2 (using the token directly)
+# TODO: fix later
+# RUN pipenv run transformers-cli download --trust-remote-code bigcode/starcoder2-7b
 
 COPY . .
-COPY models /app/models
 
 EXPOSE 8000
 

@@ -30,9 +30,9 @@ services:
           devices:
             - driver: nvidia
               count: 1 # Request 1 GPU (adjust if needed)
-              capabilities: [ gpu ]
+              capabilities: [gpu]
     volumes:
-      - ./llm/models:/app/models # Mount LLM model files
+      - ./models:/app/models
     environment:
       - NVIDIA_VISIBLE_DEVICES=0 # Use first GPU
 

@@ -4,9 +4,15 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-flask = "*" 
+flask = "*"
 requests = "*"
-blinker = "==1.9.0" 
+transformers = "*"
+bitsandbytes = "*"
+accelerate = "*"
+torch = "*"
+tensorflow = "*"
+blinker = "==1.9.0"
+pytest = "*"
 
 [dev-packages]
 pytest = "*"
@@ -22,6 +28,3 @@ flake8-annotations-complexity = "*"
 flake8-expression-complexity = "*"
 flake8-cognitive-complexity = "*"
 flake8-adjustable-complexity = "*"
-
-[requires]
-python_version = "3.12"
