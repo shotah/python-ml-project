@@ -1,0 +1,11 @@
+#!/usr/bin/env node
+
+const { execSync } = require('child_process');
+
+try {
+  execSync('npm run precommit-hook', { stdio: 'inherit' });
+  process.exit(0); // Success
+} catch (error) {
+  console.error('Pre-commit hook failed!');
+  process.exit(1); // Failure
+}
